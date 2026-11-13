@@ -1,0 +1,2 @@
+"""Checkout API fixture package."""
+
