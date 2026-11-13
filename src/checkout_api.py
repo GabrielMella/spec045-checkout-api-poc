@@ -6,18 +6,26 @@ from typing import Protocol
 
 
 class SessionGateway(Protocol):
-    def validate(self, token: str) -> bool: ...
+    def validate(self, token: str, *, correlation_id: str | None = None) -> bool: ...
 
 
-def authorize_checkout(token: str, *, sessions: SessionGateway) -> dict[str, object]:
+def authorize_checkout(
+    token: str,
+    *,
+    sessions: SessionGateway,
+    correlation_id: str | None = None,
+) -> dict[str, object]:
     """Translate session validation into the public checkout response."""
 
     try:
-        active = sessions.validate(token)
+        active = sessions.validate(token, correlation_id=correlation_id)
     except TimeoutError:
         return {
             "status": 503,
-            "body": {"error": "authentication_unavailable"},
+            "body": {
+                "error": "authentication_unavailable",
+                "correlation_id": correlation_id,
+            },
         }
 
     if not active:
