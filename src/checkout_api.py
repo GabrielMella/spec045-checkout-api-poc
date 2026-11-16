@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
+RETRY_AFTER_SECONDS = 30
+
 
 class SessionGateway(Protocol):
     def validate(self, token: str) -> bool: ...
@@ -17,6 +19,7 @@ def authorize_checkout(token: str, *, sessions: SessionGateway) -> dict[str, obj
     except TimeoutError:
         return {
             "status": 503,
+            "headers": {"Retry-After": RETRY_AFTER_SECONDS},
             "body": {"error": "authentication_unavailable"},
         }
 
