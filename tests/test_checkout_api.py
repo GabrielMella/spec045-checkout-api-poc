@@ -1,4 +1,4 @@
-from src.checkout_api import authorize_checkout
+from src.checkout_api import RETRY_AFTER_SECONDS, authorize_checkout
 
 
 class StubSessions:
@@ -19,7 +19,7 @@ def test_active_session_authorizes_checkout() -> None:
 
 
 def test_timeout_is_exposed_as_service_unavailable() -> None:
-    assert authorize_checkout("token", sessions=StubSessions(TimeoutError())) == {
-        "status": 503,
-        "body": {"error": "authentication_unavailable"},
-    }
+    response = authorize_checkout("token", sessions=StubSessions(TimeoutError()))
+    assert response["status"] == 503
+    assert response["body"] == {"error": "authentication_unavailable"}
+    assert response["headers"]["Retry-After"] == RETRY_AFTER_SECONDS
