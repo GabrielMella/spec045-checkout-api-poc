@@ -21,5 +21,11 @@ def test_active_session_authorizes_checkout() -> None:
 def test_timeout_is_exposed_as_service_unavailable() -> None:
     assert authorize_checkout("token", sessions=StubSessions(TimeoutError())) == {
         "status": 503,
-        "body": {"error": "authentication_unavailable"},
+        "body": {"error": "authentication_unavailable", "retry_after": 30},
     }
+
+
+def test_timeout_response_includes_positive_retry_after() -> None:
+    response = authorize_checkout("token", sessions=StubSessions(TimeoutError()))
+    retry_after = response["body"]["retry_after"]  # type: ignore[index]
+    assert isinstance(retry_after, int) and retry_after > 0
