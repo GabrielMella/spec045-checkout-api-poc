@@ -18,6 +18,7 @@ def authorize_checkout(token: str, *, sessions: SessionGateway) -> dict[str, obj
         return {
             "status": 503,
             "body": {"error": "authentication_unavailable"},
+            "headers": {"Retry-After": 30},
         }
 
     if not active:

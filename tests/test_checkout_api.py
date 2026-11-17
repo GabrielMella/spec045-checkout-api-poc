@@ -22,4 +22,11 @@ def test_timeout_is_exposed_as_service_unavailable() -> None:
     assert authorize_checkout("token", sessions=StubSessions(TimeoutError())) == {
         "status": 503,
         "body": {"error": "authentication_unavailable"},
+        "headers": {"Retry-After": 30},
     }
+
+
+def test_timeout_response_includes_retry_after() -> None:
+    response = authorize_checkout("token", sessions=StubSessions(TimeoutError()))
+    assert "Retry-After" in response["headers"]  # type: ignore[index]
+    assert response["headers"]["Retry-After"] > 0  # type: ignore[index]
