@@ -17,6 +17,7 @@ def authorize_checkout(token: str, *, sessions: SessionGateway) -> dict[str, obj
     except TimeoutError:
         return {
             "status": 503,
+            "headers": {"Retry-After": "30"},
             "body": {"error": "authentication_unavailable"},
         }
 
