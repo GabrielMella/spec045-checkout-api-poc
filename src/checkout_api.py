@@ -12,6 +12,9 @@ class SessionGateway(Protocol):
 def authorize_checkout(token: str, *, sessions: SessionGateway) -> dict[str, object]:
     """Translate session validation into the public checkout response."""
 
+    if not token.strip():
+        return {"status": 400, "body": {"error": "missing_session_token"}}
+
     try:
         active = sessions.validate(token)
     except TimeoutError:
